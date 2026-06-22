@@ -2,12 +2,19 @@ package com.rpmcompare.service;
 
 import com.rpmcompare.model.Vehicle;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class VehicleService {
+
+    private final PlateRecognizerService plateRecognizerService;
+
+    public VehicleService(PlateRecognizerService plateRecognizerService) {
+        this.plateRecognizerService = plateRecognizerService;
+    }
 
     private static final Vehicle BMW_M3_CS = new Vehicle(
         "BMW", "M3 CS", "BMW M3 CS", "2023",
@@ -46,8 +53,11 @@ public class VehicleService {
         return clone(BMW_M3_CS);
     }
 
-    public String simulateScan() {
-        return "GT-550-MS";
+    public String ocrPlate(MultipartFile image) throws Exception {
+        if (!plateRecognizerService.isConfigured()) {
+            return "GT-550-MS"; // mock en dev si clé absente
+        }
+        return plateRecognizerService.recognize(image);
     }
 
     private Vehicle clone(Vehicle src) {
