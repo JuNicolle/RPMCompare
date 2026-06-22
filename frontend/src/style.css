@@ -1,0 +1,61 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #060709;
+  color: #f2f3f5;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+#app {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+input {
+  font-family: inherit;
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+@keyframes rpm-scanline {
+  0%   { top: 4%; }
+  50%  { top: 88%; }
+  100% { top: 4%; }
+}
+
+@keyframes rpm-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.2; }
+}
+
+@keyframes rpm-pulseglow {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(219,59,46,0.35); }
+  50%      { box-shadow: 0 0 0 6px rgba(219,59,46,0.1); }
+}
+
+@keyframes rpm-fadein {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.screen-enter-active { animation: rpm-fadein 0.22s ease; }
+.screen-leave-active { opacity: 0; transition: opacity 0.15s; }

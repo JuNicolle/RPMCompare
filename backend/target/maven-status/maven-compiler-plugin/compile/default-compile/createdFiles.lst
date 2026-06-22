@@ -1,0 +1,5 @@
+com/rpmcompare/RpmCompareApplication.class
+com/rpmcompare/config/CorsConfig.class
+com/rpmcompare/model/Vehicle.class
+com/rpmcompare/controller/VehicleController.class
+com/rpmcompare/service/VehicleService.class
