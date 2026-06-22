@@ -5,6 +5,7 @@ frontend/dist/
 # Backend
 backend/target/
 backend/*.log
+backend/src/main/resources/application.properties
 
 # IDE
 .idea/
