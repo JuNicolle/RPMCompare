@@ -9,7 +9,13 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false,
+        ws: false,
+        bypass(req) {
+          // Laisser passer toutes les méthodes sans restriction
+          return null
+        }
       }
     }
   }

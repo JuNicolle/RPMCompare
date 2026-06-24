@@ -7,9 +7,11 @@ export default function ScanView() {
   const navigate = useNavigate()
   const { setPlate } = useStore()
   const videoRef = useRef(null)
-  const canvasRef = useRef(null)
+  const fileInputRef = useRef(null)
   const streamRef = useRef(null)
   const [cameraError, setCameraError] = useState(false)
+  const [videoReady, setVideoReady] = useState(false)
+  const [cameraStopped, setCameraStopped] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [detected, setDetected] = useState(false)
   const [displayPlate, setDisplayPlate] = useState('–  –  –')
@@ -19,6 +21,7 @@ export default function ScanView() {
     if (detected) return '✓  Véhicule identifié'
     if (processing) return 'Analyse en cours…'
     if (ocrError) return ocrError
+    if (!videoReady) return 'Initialisation caméra…'
     return 'Centrez la plaque et déclenchez'
   }
 
@@ -36,6 +39,7 @@ export default function ScanView() {
 
   function stopCamera() {
     streamRef.current?.getTracks().forEach(t => t.stop())
+    streamRef.current = null
   }
 
   function leave() {
@@ -43,43 +47,66 @@ export default function ScanView() {
     navigate('/')
   }
 
-  async function capture() {
-    if (processing || !videoRef.current) return
+  function handleShutter() {
+    if (processing || cameraStopped) return
+    // Arrête le preview, ouvre la caméra native iOS via file input
+    stopCamera()
+    setCameraStopped(true)
+    fileInputRef.current?.click()
+  }
+
+  async function handleFileSelected(e) {
+    const file = e.target.files?.[0]
+    if (!file) {
+      // L'utilisateur a annulé → relance le preview
+      setCameraStopped(false)
+      setVideoReady(false)
+      startCamera()
+      return
+    }
+
     setProcessing(true)
+    setOcrError('')
 
-    const video = videoRef.current
-    const canvas = canvasRef.current
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    canvas.getContext('2d').drawImage(video, 0, 0)
+    const formData = new FormData()
+    formData.append('image', file)
 
-    canvas.toBlob(async (blob) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', '/api/vehicle/scan')
+    xhr.timeout = 20000
+
+    xhr.onload = () => {
       try {
-        const formData = new FormData()
-        formData.append('image', blob, 'plate.jpg')
-        const res = await fetch('/api/vehicle/scan', { method: 'POST', body: formData })
-        const data = await res.json()
-
-        if (!res.ok) {
-          setOcrError(data.error || 'Plaque non reconnue, réessayez')
+        const data = JSON.parse(xhr.responseText)
+        if (xhr.status >= 200 && xhr.status < 300 && data.plate) {
+          setDisplayPlate(data.plate)
+          setPlate(data.plate)
+          setDetected(true)
+          setTimeout(() => navigate('/fiche'), 950)
+        } else {
+          setOcrError(`[${xhr.status}] ${data.error || 'Plaque non reconnue'}`)
           setProcessing(false)
-          return
         }
-
-        setDisplayPlate(data.plate)
-        setPlate(data.plate)
-        setDetected(true)
-        setOcrError('')
-
-        setTimeout(() => {
-          stopCamera()
-          navigate('/fiche')
-        }, 950)
       } catch {
-        setOcrError('Erreur réseau')
+        setOcrError(xhr.responseText.slice(0, 120) || `Réponse invalide [${xhr.status}]`)
         setProcessing(false)
       }
-    }, 'image/jpeg', 0.92)
+    }
+
+    xhr.onerror = () => { setOcrError('Erreur réseau XHR'); setProcessing(false) }
+    xhr.ontimeout = () => { setOcrError('Délai dépassé (20s)'); setProcessing(false) }
+
+    xhr.send(formData)
+  }
+
+  function retry() {
+    setOcrError('')
+    setProcessing(false)
+    setCameraStopped(false)
+    setVideoReady(false)
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    startCamera()
   }
 
   useEffect(() => {
@@ -87,7 +114,8 @@ export default function ScanView() {
     return stopCamera
   }, [])
 
-  const statusClass = `status-label${detected ? ' detected' : ''}${!detected && !processing ? ' blinking' : ''}`
+  const statusClass = `status-label${detected ? ' detected' : ''}${!detected && !processing && !ocrError ? ' blinking' : ''}${ocrError ? ' error' : ''}`
+  const shutterDisabled = processing || cameraStopped
 
   return (
     <div className="scan-screen">
@@ -101,17 +129,25 @@ export default function ScanView() {
       </div>
 
       <div className="viewfinder">
-        {!cameraError ? (
-          <video ref={videoRef} className="camera-feed" autoPlay playsInline muted />
-        ) : (
+        {!cameraError && !cameraStopped && (
+          <video ref={videoRef} className="camera-feed" autoPlay playsInline muted
+            onLoadedMetadata={() => setVideoReady(true)} />
+        )}
+
+        {cameraStopped && processing && !ocrError && !detected && (
+          <div className="camera-stopped">
+            <div className="spinner"></div>
+          </div>
+        )}
+
+        {cameraError && (
           <div className="camera-error">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#db3b2e" strokeWidth="1.5" strokeLinecap="round">
               <path d="M23 7l-7 5 7 5V7z"/>
               <rect x="1" y="5" width="15" height="14" rx="2"/>
               <line x1="1" y1="1" x2="23" y2="23"/>
             </svg>
-            <p>Caméra inaccessible</p>
-            <button className="fallback-btn" onClick={leave}>Saisir manuellement</button>
+            <p>Appuyez sur le bouton pour prendre une photo</p>
           </div>
         )}
 
@@ -122,26 +158,37 @@ export default function ScanView() {
           <div className="corner tr"></div>
           <div className="corner bl"></div>
           <div className="corner br"></div>
-          {!processing && <div className="scan-line"></div>}
+          {!processing && !cameraStopped && <div className="scan-line"></div>}
         </div>
 
         <div className="readout">
           <div className="detected-plate">{displayPlate}</div>
           <div className={statusClass}>{statusText()}</div>
+          {ocrError && (
+            <button className="retry-btn" onClick={retry}>Réessayer</button>
+          )}
         </div>
       </div>
 
       <div className="shutter-bar">
         <button
-          className={`shutter-btn${processing ? ' processing' : ''}`}
-          disabled={processing || cameraError}
-          onClick={capture}
+          className={`shutter-btn${shutterDisabled ? ' processing' : ''}`}
+          disabled={shutterDisabled}
+          onClick={handleShutter}
         >
           <div className="shutter-inner"></div>
         </button>
       </div>
 
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      {/* Input caméra natif iOS — déclenché par le bouton shutter */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: 'none' }}
+        onChange={handleFileSelected}
+      />
     </div>
   )
 }
