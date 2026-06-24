@@ -1,7 +1,7 @@
 server.port=8080
 spring.application.name=rpmcompare
 
-# PostgreSQL
+# PostgreSQL — adapter username/password selon ton installation
 spring.datasource.url=jdbc:postgresql://localhost:5432/rpmcompare
 spring.datasource.username=postgres
 spring.datasource.password=postgres
@@ -17,4 +17,5 @@ spring.servlet.multipart.max-file-size=10MB
 spring.servlet.multipart.max-request-size=10MB
 
 # Plate Recognizer — https://app.platerecognizer.com/accounts/profile/
+# Laisser vide pour utiliser le mock en dev
 platerecognizer.api-key=

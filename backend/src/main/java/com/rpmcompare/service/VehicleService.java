@@ -1,71 +1,109 @@
 package com.rpmcompare.service;
 
-import com.rpmcompare.model.Vehicle;
+import com.rpmcompare.exception.VehicleNotFoundException;
+import com.rpmcompare.model.*;
+import com.rpmcompare.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @Service
+@Transactional(readOnly = true)
 public class VehicleService {
 
     private final PlateRecognizerService plateRecognizerService;
+    private final BrandRepository brandRepository;
+    private final VehicleRangeRepository rangeRepository;
+    private final VehicleModelRepository modelRepository;
+    private final PlateLookupRepository plateLookupRepository;
 
-    public VehicleService(PlateRecognizerService plateRecognizerService) {
+    public VehicleService(PlateRecognizerService plateRecognizerService,
+                          BrandRepository brandRepository,
+                          VehicleRangeRepository rangeRepository,
+                          VehicleModelRepository modelRepository,
+                          PlateLookupRepository plateLookupRepository) {
         this.plateRecognizerService = plateRecognizerService;
+        this.brandRepository = brandRepository;
+        this.rangeRepository = rangeRepository;
+        this.modelRepository = modelRepository;
+        this.plateLookupRepository = plateLookupRepository;
     }
-
-    private static final Vehicle BMW_M3_CS = new Vehicle(
-        "BMW", "M3 CS", "BMW M3 CS", "2023",
-        "3.0L 6-cyl. biturbo", "S58", "2 993 cm³",
-        "Essence", "Auto. 8 rapports", "M xDrive intégrale",
-        550, 650, "1 765 kg", "3,4 s", "302 km/h", "GT-550-MS"
-    );
-
-    private static final Map<String, List<String>> RANGES = Map.of(
-        "BMW",          List.of("Série 1", "Série 3", "Série 4", "Série 5", "X3 M"),
-        "Audi",         List.of("A3", "A5", "RS3", "RS6", "TT RS"),
-        "Mercedes-AMG", List.of("A 45 S", "C 63", "E 63", "GT", "G 63"),
-        "Porsche",      List.of("718", "911", "Taycan", "Panamera", "Cayenne"),
-        "Renault",      List.of("Clio", "Mégane RS", "Alpine A110", "Austral", "Arkana")
-    );
 
     public List<String> getBrands() {
-        return List.of("BMW", "Audi", "Mercedes-AMG", "Porsche", "Renault");
+        return brandRepository.findAll().stream()
+                .map(Brand::getName)
+                .toList();
     }
 
-    public List<String> getRanges(String brand) {
-        return RANGES.getOrDefault(brand, List.of());
+    public List<String> getRanges(String brandName) {
+        return rangeRepository.findByBrandNameIgnoreCase(brandName).stream()
+                .map(VehicleRange::getName)
+                .toList();
     }
 
-    public List<String> getModels(String brand, String range) {
-        return List.of("M3 Compétition", "M3 CS", "M3 Touring", "320d xDrive");
+    public List<String> getModels(String brandName, String rangeName) {
+        return modelRepository
+                .findByRangeBrandNameIgnoreCaseAndRangeNameIgnoreCase(brandName, rangeName).stream()
+                .map(VehicleModel::getName)
+                .toList();
     }
 
     public Vehicle getByPlate(String plate) {
-        Vehicle v = clone(BMW_M3_CS);
-        v.setPlate(plate.toUpperCase());
-        return v;
+        PlateLookup lookup = plateLookupRepository.findByPlateIgnoreCase(plate)
+                .orElseThrow(() -> new VehicleNotFoundException("Plaque inconnue : " + plate));
+        return toDto(lookup.getModel(), lookup.getPlate());
     }
 
-    public Vehicle getByModel(String brand, String range, String model) {
-        return clone(BMW_M3_CS);
+    public Vehicle getByModel(String brandName, String rangeName, String modelName) {
+        VehicleModel model = modelRepository
+                .findByRangeBrandNameIgnoreCaseAndRangeNameIgnoreCaseAndNameIgnoreCase(
+                        brandName, rangeName, modelName)
+                .orElseThrow(() -> new VehicleNotFoundException(
+                        brandName + " / " + rangeName + " / " + modelName + " introuvable"));
+        return toDto(model, null);
     }
 
     public String ocrPlate(MultipartFile image) throws Exception {
         if (!plateRecognizerService.isConfigured()) {
-            return "GT-550-MS"; // mock en dev si clé absente
+            return "GT-550-MS";
         }
         return plateRecognizerService.recognize(image);
     }
 
-    private Vehicle clone(Vehicle src) {
+    // ── Mapping entité → DTO ──────────────────────────────────────────────────
+
+    private Vehicle toDto(VehicleModel m, String plate) {
+        VehicleSpecs s = m.getSpecs();
+        if (s == null) throw new VehicleNotFoundException("Specs manquantes pour ce modèle");
         return new Vehicle(
-            src.getBrand(), src.getModel(), src.getFull(), src.getYear(),
-            src.getEngine(), src.getCode(), src.getDisplacement(), src.getFuel(),
-            src.getGearbox(), src.getDrive(), src.getPower(), src.getTorque(),
-            src.getWeight(), src.getAccel(), src.getVmax(), src.getPlate()
+                m.getRange().getBrand().getName(),
+                m.getName(),
+                m.getRange().getBrand().getName() + " " + m.getName(),
+                m.getYearFrom() != null ? m.getYearFrom().toString() : "—",
+                s.getEngineDescription(),
+                m.getEngineCode(),
+                frNum(s.getDisplacementCc()) + " cm³",
+                s.getFuel(),
+                s.getGearbox(),
+                s.getDrive(),
+                s.getPowerHp(),
+                s.getTorqueNm(),
+                frNum(s.getWeightKg()) + " kg",
+                frAccel(s.getAccel0100()) + " s",
+                s.getVmaxKph() + " km/h",
+                plate != null ? plate : ""
         );
+    }
+
+    private String frNum(int n) {
+        if (n >= 1000) return (n / 1000) + " " + String.format("%03d", n % 1000);
+        return String.valueOf(n);
+    }
+
+    private String frAccel(BigDecimal v) {
+        return v.toPlainString().replace(".", ",");
     }
 }

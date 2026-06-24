@@ -1,70 +1,3 @@
-<template>
-  <div class="plate-screen">
-    <div class="plate-header">
-      <button class="back-btn" @click="$router.push('/')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 18l-6-6 6-6"/>
-        </svg>
-      </button>
-      <span class="header-label">SAISIE MANUELLE</span>
-    </div>
-
-    <div class="plate-body">
-      <p class="hint">
-        Immatriculation au format <span class="mono">AA-000-AA</span>
-      </p>
-
-      <!-- EU-style plate input -->
-      <div class="plate-input-wrap">
-        <div class="eu-band">
-          <div class="eu-stars">
-            <span v-for="i in 9" :key="i" class="star" :class="{ hidden: [5].includes(i) }">★</span>
-          </div>
-          <span class="eu-letter">F</span>
-        </div>
-        <input
-          ref="inputRef"
-          type="text"
-          v-model="plate"
-          @input="onInput"
-          placeholder="AB-123-CD"
-          maxlength="9"
-          class="plate-text-input"
-          autocomplete="off"
-          autocapitalize="characters"
-          spellcheck="false"
-        />
-      </div>
-
-      <button class="validate-btn" @click="submit">Valider</button>
-
-      <div class="example">EX : GT-550-MS</div>
-    </div>
-  </div>
-</template>
-
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { store } from '../store.js'
-
-const router = useRouter()
-const plate = ref('')
-
-function onInput(e) {
-  plate.value = e.target.value.toUpperCase().slice(0, 9)
-}
-
-function submit() {
-  const clean = plate.value.replace(/[\s-]/g, '')
-  if (clean.length >= 4) {
-    store.plate = plate.value
-    router.push('/fiche')
-  }
-}
-</script>
-
-<style scoped>
 .plate-screen {
   display: flex;
   flex-direction: column;
@@ -203,4 +136,3 @@ function submit() {
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 1px;
 }
-</style>

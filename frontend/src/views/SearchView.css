@@ -1,0 +1,73 @@
+.search-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px 12px;
+  gap: 12px;
+  flex: none;
+  border-bottom: 1px solid #151820;
+}
+
+.back-btn {
+  background: #1a1e28;
+  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f2f3f5;
+  flex: none;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.header-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 2.5px;
+  color: #f2f3f5;
+}
+
+.header-crumb {
+  font-size: 11px;
+  color: #db3b2e;
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.list-area {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.list-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: transparent;
+  border-bottom: 1px solid #131620;
+  color: #f2f3f5;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.list-item:active {
+  background: #131620;
+}
+
+.item-label {
+  font-size: 15.5px;
+  font-weight: 500;
+}
