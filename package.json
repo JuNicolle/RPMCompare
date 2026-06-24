@@ -1,0 +1,10 @@
+{
+  "name": "rpmcompare",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n BACK,FRONT -c bgBlue.bold,bgGreen.bold \"cd backend && ./mvnw spring-boot:run\" \"cd frontend && npm run dev -- --host\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

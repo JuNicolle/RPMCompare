@@ -182,6 +182,34 @@ plate_lookup (plaque → modèle)
 └── model_id    FK → model
 ```
 
+  {
+    "brand": "Ferrari",
+    "country": "Italie",
+    "range": "296",
+    "model": {
+      "name": "296 GTB",
+      "year_from": 2022,
+      "year_to": null,
+      "body_style": "Coupé",
+      "engine_code": "F163CE"
+    },
+    "specs": {
+      "engine_description": "3.0L V6 biturbo + électrique",
+      "fuel": "Hybride plug-in",
+      "displacement_cc": 2992,
+      "cylinders": 6,
+      "turbo": true,
+      "power_hp": 830,
+      "torque_nm": 740,
+      "gearbox": "DCT 8 rapports",
+      "drive": "Propulsion",
+      "accel_0_100": 2.9,
+      "vmax_kph": 330,
+      "weight_kg": 1470
+    },
+    "plate": "AB-123-CD"
+  }
+
 ---
 
 ## Tester sur smartphone
