@@ -1,34 +1,62 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import './FicheView.css'
 
-const car = {
-  full: 'BMW M3 CS',
-  year: '2023',
-  engine: '3.0L 6-cyl. biturbo',
-  code: 'S58',
-  displacement: '2 993 cm³',
-  fuel: 'Essence',
-  gearbox: 'Auto. 8 rapports',
-  drive: 'M xDrive intégrale',
-  power: '550',
-  torque: '650',
-  weight: '1 765 kg',
-  accel: '3,4 s',
-  vmax: '302 km/h'
-}
-
 export default function FicheView() {
   const navigate = useNavigate()
-  const { plate } = useStore()
-  const plateDisplay = plate || 'GT-550-MS'
-  const powerFill = Math.min(parseInt(car.power) / 600, 1) * 235.6
-  const torqueFill = Math.min(parseInt(car.torque) / 700, 1) * 235.6
+  const { plate, searchBrand, searchRange, searchModel } = useStore()
+  const [car, setCar] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function load() {
+      try {
+        let url
+        if (plate) {
+          url = `/api/vehicle/by-plate/${encodeURIComponent(plate)}`
+        } else {
+          url = `/api/vehicle/by-model?brand=${encodeURIComponent(searchBrand)}&range=${encodeURIComponent(searchRange)}&model=${encodeURIComponent(searchModel)}`
+        }
+        const res = await fetch(url)
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Véhicule introuvable')
+        setCar(data)
+      } catch (e) {
+        setError(e.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="fiche-screen fiche-centered">
+        <div className="fiche-status">Chargement…</div>
+      </div>
+    )
+  }
+
+  if (error || !car) {
+    return (
+      <div className="fiche-screen fiche-centered">
+        <div className="fiche-status fiche-error">{error || 'Données introuvables'}</div>
+        <button className="fiche-back-btn" onClick={() => navigate('/')}>Retour</button>
+      </div>
+    )
+  }
+
+  const powerFill = Math.min(car.power / 600, 1) * 235.6
+  const torqueFill = Math.min(car.torque / 700, 1) * 235.6
+  const plateDisplay = car.plate || plate || ''
 
   return (
     <div className="fiche-screen">
       <div className="photo-header">
-        <div className="photo-placeholder">BMW M3 CS · photo</div>
+        <div className="photo-placeholder">{car.full} · photo</div>
         <div className="photo-overlay"></div>
 
         <button className="back-pill" onClick={() => navigate('/')}>

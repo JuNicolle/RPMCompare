@@ -1,37 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import './SearchView.css'
-
-const BRANDS = ['BMW', 'Audi', 'Mercedes-AMG', 'Porsche', 'Renault']
-
-const RANGES = {
-  'BMW':          ['Série 1', 'Série 3', 'Série 4', 'Série 5', 'X3 M'],
-  'Audi':         ['A3', 'A5', 'RS3', 'RS6', 'TT RS'],
-  'Mercedes-AMG': ['A 45 S', 'C 63', 'E 63', 'GT', 'G 63'],
-  'Porsche':      ['718', '911', 'Taycan', 'Panamera', 'Cayenne'],
-  'Renault':      ['Clio', 'Mégane RS', 'Alpine A110', 'Austral', 'Arkana']
-}
-
-const MODELS = ['M3 Compétition', 'M3 CS', 'M3 Touring', '320d xDrive']
 
 const TITLES = ['Choisir une marque', 'Choisir une gamme', 'Choisir un modèle']
 
 export default function SearchView() {
   const navigate = useNavigate()
-  const { setPlate, setSearchBrand, setSearchRange } = useStore()
+  const { setPlate, setSearchBrand, setSearchRange, setSearchModel } = useStore()
   const [step, setStep] = useState(0)
   const [brand, setBrand] = useState('')
   const [range, setRange] = useState('')
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const title = TITLES[step]
   const crumb = [brand, range].filter(Boolean).join('  ›  ')
 
-  function currentList() {
-    if (step === 0) return BRANDS
-    if (step === 1) return RANGES[brand] || []
-    return MODELS
+  async function fetchList(url) {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error()
+      setList(await res.json())
+    } catch {
+      setError('Erreur de chargement')
+    } finally {
+      setLoading(false)
+    }
   }
+
+  useEffect(() => {
+    if (step === 0) fetchList('/api/brands')
+  }, [])
+
+  useEffect(() => {
+    if (step === 1) fetchList(`/api/brands/${encodeURIComponent(brand)}/ranges`)
+    if (step === 2) fetchList(`/api/brands/${encodeURIComponent(brand)}/ranges/${encodeURIComponent(range)}/models`)
+  }, [step])
 
   function pick(item) {
     if (step === 0) {
@@ -44,6 +52,7 @@ export default function SearchView() {
       setPlate('')
       setSearchBrand(brand)
       setSearchRange(range)
+      setSearchModel(item)
       navigate('/fiche')
     }
   }
@@ -72,7 +81,9 @@ export default function SearchView() {
       </div>
 
       <div className="list-area">
-        {currentList().map(item => (
+        {loading && <div className="list-status">Chargement…</div>}
+        {error && <div className="list-status list-error">{error}</div>}
+        {!loading && !error && list.map(item => (
           <button key={item} className="list-item" onClick={() => pick(item)}>
             <span className="item-label">{item}</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#424855" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
