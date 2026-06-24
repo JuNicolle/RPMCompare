@@ -71,3 +71,16 @@
   font-size: 15.5px;
   font-weight: 500;
 }
+
+.list-status {
+  padding: 32px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #424855;
+  text-align: center;
+}
+
+.list-error {
+  color: #db3b2e;
+}

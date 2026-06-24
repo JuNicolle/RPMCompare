@@ -3,28 +3,87 @@
 Mobile-first vehicle identification app. Dark theme · IBM Plex Mono · Accent #DB3B2E
 
 ## Stack
-- **Frontend** : Vue 3 + Vite + Vue Router
+- **Frontend** : React 18 + Vite + React Router
 - **Backend** : Spring Boot 3.5 (Java 25)
 - **BDD** : PostgreSQL (Plan D — base locale curated)
+- **OCR** : Plate Recognizer API
 
 ---
 
-## Lancer en dev
+## Prérequis
 
-### Backend
+| Outil | Version min | Vérifier |
+|---|---|---|
+| Java | 21+ | `java -version` |
+| Maven | via wrapper `./mvnw` | inclus |
+| Node.js | 18+ | `node -v` |
+| PostgreSQL | 14+ | `psql --version` |
+| ngrok | any | `ngrok --version` (optionnel, test mobile) |
+
+### Installer PostgreSQL (macOS)
+```bash
+brew install postgresql@17
+brew services start postgresql@17
+```
+
+---
+
+## Installation & premier démarrage
+
+### 1. Créer la base PostgreSQL
+
+```bash
+# Créer le rôle postgres s'il n'existe pas
+createuser -s postgres
+
+# Créer la base
+createdb rpmcompare
+```
+
+> Si ton utilisateur PostgreSQL n'est pas `postgres`, adapte le username dans `application.properties`.
+
+### 2. Configurer les secrets
+
+Copie le fichier template et remplis les valeurs :
+```bash
+cp backend/src/main/resources/application.properties.example \
+   backend/src/main/resources/application.properties
+```
+
+Contenu à remplir dans `application.properties` :
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/rpmcompare
+spring.datasource.username=postgres
+spring.datasource.password=          # ton mot de passe postgres
+spring.jpa.hibernate.ddl-auto=validate
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+spring.servlet.multipart.max-file-size=10MB
+platerecognizer.api-key=             # ton token Plate Recognizer
+```
+
+> `application.properties` est gitignore — il ne sera jamais commité.
+
+### 3. Démarrer le backend
+
+Au premier démarrage, **Flyway crée automatiquement** le schéma (V1) et insère les données de seed (V2).
+
 ```bash
 cd backend
 ./mvnw spring-boot:run
 # → http://localhost:8080
 ```
 
-### Frontend
+### 4. Démarrer le frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 # → http://localhost:5173
 ```
+
+Ouvre http://localhost:5173 dans le navigateur.
 
 ---
 
@@ -36,6 +95,36 @@ npm run dev
 | `/plate` | Saisie manuelle immatriculation EU |
 | `/search` | Recherche Marque → Gamme → Modèle |
 | `/fiche` | Fiche véhicule (jauges, stats, specs) |
+
+---
+
+## Données de test incluses
+
+La migration V2 insère les véhicules suivants :
+
+| Plaque | Véhicule | Puissance |
+|---|---|---|
+| `GT-550-MS` | BMW M3 CS | 550 ch |
+| *(recherche)* | BMW M3 Compétition | 510 ch |
+| *(recherche)* | BMW M3 Touring | 510 ch |
+| *(recherche)* | Porsche 911 GT3 | 510 ch |
+| *(recherche)* | Mercedes-AMG C 63 S E Performance | 680 ch |
+| *(recherche)* | Audi RS6 Avant | 600 ch |
+
+Marques disponibles dans la recherche : BMW · Audi · Mercedes-AMG · Porsche · Renault
+
+---
+
+## Endpoints API
+
+```
+GET  /api/brands
+GET  /api/brands/{brand}/ranges
+GET  /api/brands/{brand}/ranges/{range}/models
+GET  /api/vehicle/by-plate/{plate}
+GET  /api/vehicle/by-model?brand=&range=&model=
+POST /api/vehicle/scan          (multipart: image)
+```
 
 ---
 
@@ -142,6 +231,9 @@ Compte gratuit : https://dashboard.ngrok.com/signup
 ```bash
 ngrok config add-authtoken TON_TOKEN_NGROK
 ```
+
+> Le token ngrok est personnel et ne doit pas être commité.
+
 
 #### 3. Démarrer dans l'ordre
 ```bash

@@ -225,6 +225,36 @@
   padding: 4px 16px 32px;
 }
 
+.fiche-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.fiche-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #424855;
+}
+
+.fiche-error {
+  color: #db3b2e;
+}
+
+.fiche-back-btn {
+  padding: 12px 28px;
+  background: #db3b2e;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
 .comparateur-btn {
   width: 100%;
   padding: 14px;
