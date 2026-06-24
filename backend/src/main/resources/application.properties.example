@@ -1,0 +1,21 @@
+server.port=8080
+spring.application.name=rpmcompare
+
+# PostgreSQL — adapter username/password selon ton installation
+spring.datasource.url=jdbc:postgresql://localhost:5432/rpmcompare
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.open-in-view=false
+
+# Flyway
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+
+# Multipart (photos caméra)
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+# Plate Recognizer — https://app.platerecognizer.com/accounts/profile/
+# Laisser vide pour utiliser le mock en dev
+platerecognizer.api-key=

@@ -1,8 +1,9 @@
 package com.rpmcompare.controller;
 
+import com.rpmcompare.exception.VehicleNotFoundException;
 import com.rpmcompare.model.Vehicle;
-import com.rpmcompare.service.VehicleService;
 import com.rpmcompare.service.PlateRecognizerService;
+import com.rpmcompare.service.VehicleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,16 +39,25 @@ public class VehicleController {
     }
 
     @GetMapping("/vehicle/by-plate/{plate}")
-    public ResponseEntity<Vehicle> getByPlate(@PathVariable String plate) {
-        return ResponseEntity.ok(vehicleService.getByPlate(plate));
+    public ResponseEntity<?> getByPlate(@PathVariable String plate) {
+        try {
+            return ResponseEntity.ok(vehicleService.getByPlate(plate));
+        } catch (VehicleNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping("/vehicle/by-model")
-    public ResponseEntity<Vehicle> getByModel(
-            @RequestParam String brand,
-            @RequestParam String range,
-            @RequestParam String model) {
-        return ResponseEntity.ok(vehicleService.getByModel(brand, range, model));
+    public ResponseEntity<?> getByModel(@RequestParam String brand,
+                                        @RequestParam String range,
+                                        @RequestParam String model) {
+        try {
+            return ResponseEntity.ok(vehicleService.getByModel(brand, range, model));
+        } catch (VehicleNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping(value = "/vehicle/scan", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
