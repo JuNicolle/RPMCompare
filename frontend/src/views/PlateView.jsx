@@ -22,34 +22,29 @@ export default function PlateView() {
 
   return (
     <div className="plate-screen">
-      <div className="plate-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
+      <div className="top-tab-bar">
+        <button className="tab" onClick={() => navigate('/scan')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Scan
         </button>
-        <span className="header-label">SAISIE MANUELLE</span>
+        <button className="tab active">
+          <span className="tab-hash">#</span> Plaque
+        </button>
+        <button className="tab" onClick={() => navigate('/search')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Modèle
+        </button>
       </div>
 
       <div className="plate-body">
-        <p className="hint">
-          Immatriculation au format <span className="mono">AA-000-AA</span>
-        </p>
-
+        <div className="plate-label">Entrez une plaque</div>
+        
         <div className="plate-input-wrap">
-          <div className="eu-band">
-            <div className="eu-stars">
-              {[1,2,3,4,5,6,7,8,9].map(i => (
-                <span key={i} className={`star${i === 5 ? ' hidden' : ''}`}>★</span>
-              ))}
-            </div>
-            <span className="eu-letter">F</span>
-          </div>
           <input
             type="text"
             value={plate}
             onChange={onInput}
-            placeholder="AB-123-CD"
+            placeholder="Ex : AB-123-CD"
             maxLength={9}
             className="plate-text-input"
             autoComplete="off"
@@ -58,9 +53,7 @@ export default function PlateView() {
           />
         </div>
 
-        <button className="validate-btn" onClick={submit}>Valider</button>
-
-        <div className="example">EX : GT-550-MS</div>
+        <button className="validate-btn" onClick={submit}>Go</button>
       </div>
     </div>
   )

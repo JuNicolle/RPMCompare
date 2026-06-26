@@ -7,9 +7,9 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #060709;
+  background: #233338;
   color: #f2f3f5;
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: 'Inter', 'Roboto', 'IBM Plex Sans', sans-serif;
 }
 
 #app {
@@ -59,3 +59,55 @@ input {
 
 .screen-enter-active { animation: rpm-fadein 0.22s ease; }
 .screen-leave-active { opacity: 0; transition: opacity 0.15s; }
+
+/* Global Top Tab Bar */
+.top-tab-bar {
+  display: flex;
+  background: #2a3d46;
+  border-radius: 12px;
+  margin: 16px;
+  padding: 4px;
+  gap: 4px;
+  position: relative;
+  z-index: 100;
+}
+
+.top-tab-bar .tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.top-tab-bar .tab svg {
+  opacity: 0.8;
+}
+
+.top-tab-bar .tab.active {
+  background: #39525c;
+  color: #00E5FF;
+}
+
+.top-tab-bar .tab.active svg {
+  stroke: #00E5FF;
+  opacity: 1;
+}
+
+.tab-hash {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.top-tab-bar .tab.active .tab-hash {
+  color: #00E5FF;
+  opacity: 1;
+}

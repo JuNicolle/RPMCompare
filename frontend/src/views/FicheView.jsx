@@ -49,115 +49,76 @@ export default function FicheView() {
     )
   }
 
-  const powerFill = Math.min(car.power / 600, 1) * 235.6
-  const torqueFill = Math.min(car.torque / 700, 1) * 235.6
-  const plateDisplay = car.plate || plate || ''
-
   return (
     <div className="fiche-screen">
-      <div className="photo-header">
-        <div className="photo-placeholder">{car.full} · photo</div>
-        <div className="photo-overlay"></div>
-
-        <button className="back-pill" onClick={() => navigate('/')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
-        </button>
-
-        {plateDisplay && <div className="plate-badge">{plateDisplay}</div>}
-
-        <div className="photo-title">
-          <div className="car-full">{car.full}</div>
-          <div className="car-meta">
-            <span>{car.year}</span>
-            <span className="dot"></span>
-            <span>{car.fuel}</span>
-            <span className="dot"></span>
-            <span>{car.code}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="accent-line"></div>
-
-      <div className="gauges">
-        <div className="gauge-card">
-          <div className="gauge-svg-wrap">
-            <svg width="110" height="110" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#1a1e2a" strokeWidth="8" strokeLinecap="round"
-                strokeDasharray="235.6 314.16" transform="rotate(135 60 60)"/>
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#db3b2e" strokeWidth="8" strokeLinecap="round"
-                strokeDasharray={`${powerFill} 314.16`} transform="rotate(135 60 60)"
-                style={{ filter: 'drop-shadow(0 0 8px rgba(219,59,46,.6))' }}/>
+      <div className="photo-placeholder-area">
+        <div className="header-nav">
+          <button className="back-icon-btn" onClick={() => navigate('/')}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
             </svg>
-            <div className="gauge-value">
-              <span className="gauge-number">{car.power}</span>
-              <span className="gauge-unit power-unit">CH</span>
-            </div>
+          </button>
+          <div className="page-title">Modèle</div>
+        </div>
+      </div>
+
+      <div className="main-card">
+        <div className="car-title">{car.full}</div>
+
+        <div className="stats-circles">
+          <div className="stat-circle stat-cyan">
+            <div className="stat-circle-label">Chevaux</div>
+            <div className="stat-circle-val">{car.power || '-'} ch</div>
           </div>
-          <div className="gauge-label">PUISSANCE</div>
-        </div>
-
-        <div className="gauge-card">
-          <div className="gauge-svg-wrap">
-            <svg width="110" height="110" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#1a1e2a" strokeWidth="8" strokeLinecap="round"
-                strokeDasharray="235.6 314.16" transform="rotate(135 60 60)"/>
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#8a2820" strokeWidth="8" strokeLinecap="round"
-                strokeDasharray={`${torqueFill} 314.16`} transform="rotate(135 60 60)"
-                style={{ filter: 'drop-shadow(0 0 8px rgba(138,40,32,.6))' }}/>
-            </svg>
-            <div className="gauge-value">
-              <span className="gauge-number">{car.torque}</span>
-              <span className="gauge-unit torque-unit">NM</span>
-            </div>
+          <div className="stat-circle stat-red">
+            <div className="stat-circle-label">Couple</div>
+            <div className="stat-circle-val">{car.torque || '-'} nm</div>
           </div>
-          <div className="gauge-label">COUPLE</div>
+          <div className="stat-circle stat-purple">
+            <div className="stat-circle-label">0-100</div>
+            <div className="stat-circle-val">{car.accel || '-'} s</div>
+          </div>
         </div>
       </div>
 
-      <div className="quick-stats">
-        <div className="stat-card">
-          <div className="stat-value">{car.accel}</div>
-          <div className="stat-label">0–100 KM/H</div>
+      <div className="specs-list">
+        <div className="spec-item">
+          <div className="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <div className="spec-text">
+            <div className="spec-name">Moteur</div>
+            <div className="spec-desc">{car.engine || '-'} · {car.fuel || '-'}</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value stat-red">{car.vmax}</div>
-          <div className="stat-label">V-MAX</div>
+
+        <div className="spec-separator"></div>
+
+        <div className="spec-item">
+          <div className="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <div className="spec-text">
+            <div className="spec-name">Transmission</div>
+            <div className="spec-desc">{car.drive || '-'} · {car.gearbox || '-'}</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value">{car.weight}</div>
-          <div className="stat-label">POIDS</div>
+
+        <div className="spec-separator"></div>
+
+        <div className="spec-item">
+          <div className="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <div className="spec-text">
+            <div className="spec-name">Performances</div>
+            <div className="spec-desc">V-Max : {car.vmax || '-'} · Poids : {car.weight || '-'}</div>
+          </div>
         </div>
       </div>
 
-      <div className="specs-section">
-        <div className="specs-title">CARACTÉRISTIQUES</div>
-        <div className="spec-row">
-          <span className="spec-key">Motorisation</span>
-          <span className="spec-val">{car.engine}</span>
-        </div>
-        <div className="spec-row">
-          <span className="spec-key">Boîte de vitesse</span>
-          <span className="spec-val">{car.gearbox}</span>
-        </div>
-        <div className="spec-row">
-          <span className="spec-key">Transmission</span>
-          <span className="spec-val">{car.drive}</span>
-        </div>
-        <div className="spec-row">
-          <span className="spec-key">Cylindrée</span>
-          <span className="spec-val">{car.displacement}</span>
-        </div>
-        <div className="spec-row spec-row-last">
-          <span className="spec-key">Carburant</span>
-          <span className="spec-val">{car.fuel}</span>
-        </div>
-      </div>
-
-      <div className="comparateur-wrap">
-        <button className="comparateur-btn">+ COMPARATEUR · BIENTÔT</button>
+      <div className="pro-wrap">
+        <button className="get-pro-btn">Get PRO</button>
       </div>
     </div>
   )
