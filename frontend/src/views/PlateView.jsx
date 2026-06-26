@@ -6,61 +6,58 @@ import './PlateView.css'
 export default function PlateView() {
   const navigate = useNavigate()
   const { setPlate } = useStore()
-  const [plate, setLocalPlate] = useState('')
+  const [val, setVal] = useState('')
 
-  function onInput(e) {
-    setLocalPlate(e.target.value.toUpperCase().slice(0, 9))
-  }
-
-  function submit() {
-    const clean = plate.replace(/[\s-]/g, '')
-    if (clean.length >= 4) {
-      setPlate(plate)
-      navigate('/fiche')
-    }
+  const submit = (e) => {
+    e.preventDefault()
+    if (!val.trim()) return
+    setPlate(val.toUpperCase())
+    navigate('/fiche')
   }
 
   return (
     <div className="plate-screen">
-      <div className="plate-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
+      <div className="top-tab-bar">
+        <button className="tab" onClick={() => navigate('/scan')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Scan
         </button>
-        <span className="header-label">SAISIE MANUELLE</span>
+        <button className="tab active">
+          <span className="tab-hash">#</span> Plaque
+        </button>
+        <button className="tab" onClick={() => navigate('/search')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Modèle
+        </button>
       </div>
 
-      <div className="plate-body">
-        <p className="hint">
-          Immatriculation au format <span className="mono">AA-000-AA</span>
-        </p>
-
-        <div className="plate-input-wrap">
-          <div className="eu-band">
-            <div className="eu-stars">
-              {[1,2,3,4,5,6,7,8,9].map(i => (
-                <span key={i} className={`star${i === 5 ? ' hidden' : ''}`}>★</span>
-              ))}
-            </div>
-            <span className="eu-letter">F</span>
+      <div className="plate-content">
+        <div className="plate-icon-wrap">
+          <div className="plate-icon-bg">
+            <svg width="32" height="24" viewBox="0 0 28 20" fill="none" stroke="#AC53F2" strokeWidth="2" strokeLinecap="round">
+              <rect x="1" y="1" width="26" height="18" rx="3"/>
+              <path d="M6 10h16"/>
+              <path d="M9 14.5h10"/>
+            </svg>
           </div>
-          <input
-            type="text"
-            value={plate}
-            onChange={onInput}
-            placeholder="AB-123-CD"
-            maxLength={9}
-            className="plate-text-input"
-            autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-          />
         </div>
 
-        <button className="validate-btn" onClick={submit}>Valider</button>
+        <h1 className="plate-title">Saisir une plaque</h1>
+        <p className="plate-desc">Entrez le numéro d'immatriculation du véhicule pour obtenir sa fiche technique complète.</p>
 
-        <div className="example">EX : GT-550-MS</div>
+        <form onSubmit={submit} className="plate-form">
+          <input
+            type="text"
+            className="plate-input"
+            placeholder="AA-000-AA"
+            value={val}
+            onChange={e => setVal(e.target.value.toUpperCase())}
+            autoFocus
+          />
+          <button type="submit" className="plate-submit">
+            Go !
+          </button>
+        </form>
       </div>
     </div>
   )
