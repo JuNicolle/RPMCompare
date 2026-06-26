@@ -5,7 +5,7 @@ Mobile-first vehicle identification app. Dark theme · IBM Plex Mono · Accent #
 ## Stack
 - **Frontend** : React 18 + Vite + React Router
 - **Backend** : Spring Boot 3.5 (Java 25)
-- **BDD** : PostgreSQL (Plan D — base locale curated)
+- **BDD** : PostgreSQL (base locale curated)
 - **OCR** : Plate Recognizer API
 
 ---
@@ -18,7 +18,6 @@ Mobile-first vehicle identification app. Dark theme · IBM Plex Mono · Accent #
 | Maven | via wrapper `./mvnw` | inclus |
 | Node.js | 18+ | `node -v` |
 | PostgreSQL | 14+ | `psql --version` |
-| ngrok | any | `ngrok --version` (optionnel, test mobile) |
 
 ### Installer PostgreSQL (macOS)
 ```bash
@@ -64,30 +63,45 @@ platerecognizer.api-key=             # ton token Plate Recognizer
 
 > `application.properties` est gitignore — il ne sera jamais commité.
 
-### 3. Démarrer le backend
+---
 
-Au premier démarrage, **Flyway crée automatiquement** le schéma (V1) et insère les données de seed (V2).
+## Démarrage
 
+### Démarrage simultané (recommandé)
+
+Depuis la racine du projet :
+```bash
+npm install   # une seule fois
+npm run dev
+```
+
+Lance le backend et le frontend en parallèle avec des logs colorés (`[BACK]` en bleu, `[FRONT]` en vert). Un seul `Ctrl+C` coupe les deux.
+
+Au premier démarrage, **Flyway crée automatiquement** le schéma et insère toutes les données.
+
+---
+
+### Démarrage manuel
+
+#### Backend
 ```bash
 cd backend
 ./mvnw spring-boot:run
 # → http://localhost:8080
 ```
 
-### 4. Démarrer le frontend
-
+#### Frontend
 ```bash
 cd frontend
-npm install
+npm install   # une seule fois
 npm run dev
 # → http://localhost:5173
 ```
 
-Ouvre http://localhost:5173 dans le navigateur.
-
 ---
 
 ## Écrans
+
 | Route | Écran |
 |---|---|
 | `/` | Home — 3 points d'entrée |
@@ -98,20 +112,85 @@ Ouvre http://localhost:5173 dans le navigateur.
 
 ---
 
-## Données de test incluses
+## Données de test
 
-La migration V2 insère les véhicules suivants :
+### Plaques scannables (OCR ou saisie manuelle)
 
 | Plaque | Véhicule | Puissance |
 |---|---|---|
 | `GT-550-MS` | BMW M3 CS | 550 ch |
-| *(recherche)* | BMW M3 Compétition | 510 ch |
-| *(recherche)* | BMW M3 Touring | 510 ch |
-| *(recherche)* | Porsche 911 GT3 | 510 ch |
-| *(recherche)* | Mercedes-AMG C 63 S E Performance | 680 ch |
-| *(recherche)* | Audi RS6 Avant | 600 ch |
+| `CH-242-GP` | BMW M3 Touring | 510 ch |
+| `CJ-354-ZD` | Volvo S80 II D5 Auto | 185 ch |
+| `HB601ZA` | Peugeot Rifter 1.5 BlueHDi 130 EAT8 | 130 ch |
 
-Marques disponibles dans la recherche : BMW · Audi · Mercedes-AMG · Porsche · Renault
+### Véhicules accessibles via la recherche uniquement
+
+| Marque | Gamme | Modèle | Puissance |
+|---|---|---|---|
+| BMW | Série 3 | M3 Compétition | 510 ch |
+| Porsche | 911 | 911 GT3 | 510 ch |
+| Mercedes-AMG | C 63 | C 63 S E Performance | 680 ch |
+| Audi | RS6 | RS6 Avant | 600 ch |
+
+### Marques disponibles dans la recherche
+
+BMW · Audi · Mercedes-AMG · Porsche · Renault · Volvo · Peugeot
+
+---
+
+## Ajouter un véhicule en base
+
+### 1. Préparer le JSON
+
+```json
+{
+  "brand": "Peugeot",
+  "country": "France",
+  "range": "Rifter",
+  "model": {
+    "name": "Rifter 1.5 BlueHDi 130 EAT8",
+    "year_from": 2018,
+    "year_to": null,
+    "body_style": "Ludospace",
+    "engine_code": "DV5RCU"
+  },
+  "specs": {
+    "engine_description": "1.5L 4-cyl. BlueHDi turbo diesel",
+    "fuel": "Diesel",
+    "displacement_cc": 1499,
+    "cylinders": 4,
+    "turbo": true,
+    "power_hp": 130,
+    "torque_nm": 300,
+    "gearbox": "EAT8 8 rapports",
+    "drive": "Traction avant",
+    "accel_0_100": 10.6,
+    "vmax_kph": 188,
+    "weight_kg": 1490
+  },
+  "plate": "HB601ZA"
+}
+```
+
+> `plate` est optionnel — mettre `null` si le véhicule est accessible uniquement via la recherche.
+
+### 2. Générer la migration
+
+Fournir le JSON — Claude génère la migration Flyway (`VX__add_xxx.sql`) avec les IDs incrémentaux corrects.
+
+### 3. Appliquer
+
+Redémarrer le backend : Flyway détecte et applique automatiquement la nouvelle migration.
+
+### Vérifier le contenu de la BDD
+
+```bash
+psql -U postgres -d rpmcompare
+
+SELECT * FROM plate_lookup;
+SELECT id, name FROM vehicle_model;
+\q
+```
 
 ---
 
@@ -143,17 +222,17 @@ platerecognizer.api-key=TON_TOKEN_ICI
 
 ```
 brand (marque)
-├── id          SERIAL PK
+├── id          BIGSERIAL PK
 ├── name        VARCHAR(50)    -- "BMW", "Porsche"
 └── country     VARCHAR(50)    -- "Allemagne"
 
 range (gamme)
-├── id          SERIAL PK
+├── id          BIGSERIAL PK
 ├── brand_id    FK → brand
 └── name        VARCHAR(50)    -- "Série 3", "911"
 
 model (modèle/version)
-├── id          SERIAL PK
+├── id          BIGSERIAL PK
 ├── range_id    FK → range
 ├── name        VARCHAR(100)   -- "M3 CS", "M3 Compétition"
 ├── year_from   SMALLINT       -- 2023
@@ -162,7 +241,7 @@ model (modèle/version)
 └── engine_code VARCHAR(20)    -- "S58"
 
 vehicle_specs (fiche technique)
-├── id              SERIAL PK
+├── id              BIGSERIAL PK
 ├── model_id        FK → model  UNIQUE
 ├── fuel            VARCHAR(20) -- "Essence", "Diesel", "Hybride"
 ├── displacement_cc INTEGER     -- 2993
@@ -177,110 +256,54 @@ vehicle_specs (fiche technique)
 └── weight_kg       SMALLINT    -- 1765
 
 plate_lookup (plaque → modèle)
-├── id          SERIAL PK
+├── id          BIGSERIAL PK
 ├── plate       VARCHAR(10) UNIQUE  -- "GT-550-MS"
 └── model_id    FK → model
 ```
 
-  {
-    "brand": "Ferrari",
-    "country": "Italie",
-    "range": "296",
-    "model": {
-      "name": "296 GTB",
-      "year_from": 2022,
-      "year_to": null,
-      "body_style": "Coupé",
-      "engine_code": "F163CE"
-    },
-    "specs": {
-      "engine_description": "3.0L V6 biturbo + électrique",
-      "fuel": "Hybride plug-in",
-      "displacement_cc": 2992,
-      "cylinders": 6,
-      "turbo": true,
-      "power_hp": 830,
-      "torque_nm": 740,
-      "gearbox": "DCT 8 rapports",
-      "drive": "Propulsion",
-      "accel_0_100": 2.9,
-      "vmax_kph": 330,
-      "weight_kg": 1470
-    },
-    "plate": "AB-123-CD"
-  }
+---
+
+## Migrations Flyway
+
+| Version | Fichier | Contenu |
+|---|---|---|
+| V1 | `V1__create_schema.sql` | Création du schéma complet |
+| V2 | `V2__seed_data.sql` | Données initiales (BMW, Audi, Mercedes, Porsche, Renault) |
+| V3 | `V3__add_test_plates.sql` | Plaque CH-242-GP → BMW M3 Touring |
+| V4 | `V4__add_volvo_s80.sql` | Volvo S80 II D5 Auto + plaque CJ-354-ZD |
+| V5 | `V5__add_peugeot_rifter.sql` | Peugeot Rifter BlueHDi 130 + plaque HB601ZA |
 
 ---
 
 ## Tester sur smartphone
 
-### Pourquoi c'est non-trivial
+### WiFi local (recommandé)
 
-L'accès à la **caméra** (`getUserMedia`) est bloqué par les navigateurs mobiles sur HTTP.
-Seuls `localhost` et les origines **HTTPS** sont autorisés.
-Il faut donc exposer le frontend en HTTPS pour que le scan fonctionne sur téléphone.
-
----
-
-### Option A — WiFi local (navigation sans caméra)
-
-Utile pour tester les écrans Home, Saisie manuelle, Recherche et Fiche.
-
+Depuis la racine :
 ```bash
-# Lancer Vite en exposant sur le réseau local
-cd frontend
-npm run dev -- --host
+npm run dev
 ```
 
-Vite affiche deux URLs :
+Vite affiche l'adresse réseau :
 ```
-Local:   http://localhost:5173
-Network: http://192.168.x.x:5173  ← cette adresse sur le téléphone
+[FRONT] Network: http://192.168.x.x:5173
 ```
 
-Téléphone et Mac doivent être sur le **même réseau WiFi**.
-La caméra sera bloquée (HTTP), tout le reste fonctionne.
+Ouvre cette URL sur le téléphone (**même réseau WiFi** que le Mac).
+
+Le scan fonctionne via la caméra native iOS (`input type="file" capture="environment"`) — **pas besoin de HTTPS**.
 
 ---
 
-### Option B — ngrok · HTTPS complet ✓ (recommandé)
+### ngrok (optionnel — preview vidéo uniquement)
 
-Crée un tunnel HTTPS public vers ton Vite local.
-La caméra fonctionne car l'URL est en HTTPS.
-Le proxy Vite (`/api → localhost:8080`) continue de tourner côté Mac — le backend n'a pas besoin d'être exposé séparément.
+ngrok n'est plus requis depuis que le scan utilise `input type="file"` au lieu de `getUserMedia`. Il reste utile uniquement si tu veux afficher un **flux vidéo live** dans le navigateur, ce qui requiert HTTPS.
 
-#### 1. Installer ngrok
 ```bash
 brew install ngrok
-```
-
-#### 2. Créer un compte et configurer le token
-Compte gratuit : https://dashboard.ngrok.com/signup
-```bash
 ngrok config add-authtoken TON_TOKEN_NGROK
-```
-
-> Le token ngrok est personnel et ne doit pas être commité.
-
-
-#### 3. Démarrer dans l'ordre
-```bash
-# Terminal 1 — backend
-cd backend && ./mvnw spring-boot:run
-
-# Terminal 2 — frontend exposé sur le réseau
-cd frontend && npm run dev -- --host
-
-# Terminal 3 — tunnel HTTPS
 ngrok http 5173
 ```
 
-#### 4. Ouvrir sur le téléphone
-ngrok affiche une URL du type :
-```
-Forwarding  https://abc123.ngrok-free.app → http://localhost:5173
-```
-Ouvre cette URL sur le navigateur du téléphone → caméra opérationnelle.
-
-> **Note :** avec le plan gratuit ngrok, l'URL change à chaque redémarrage du tunnel.
-
+> Le token ngrok est personnel et ne doit pas être commité.
+> Avec le plan gratuit, l'URL change à chaque redémarrage du tunnel.
