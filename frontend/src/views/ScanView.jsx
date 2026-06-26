@@ -55,6 +55,32 @@ export default function ScanView() {
     fileInputRef.current?.click()
   }
 
+  function compressImage(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const MAX = 1280
+          let w = img.width, h = img.height
+          if (w > MAX || h > MAX) {
+            if (w > h) { h = Math.round(h * MAX / w); w = MAX }
+            else { w = Math.round(w * MAX / h); h = MAX }
+          }
+          const canvas = document.createElement('canvas')
+          canvas.width = w
+          canvas.height = h
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+          canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.8)
+        }
+        img.onerror = () => resolve(file)
+        img.src = e.target.result
+      }
+      reader.onerror = () => resolve(file)
+      reader.readAsDataURL(file)
+    })
+  }
+
   async function handleFileSelected(e) {
     const file = e.target.files?.[0]
     if (!file) {
@@ -68,8 +94,9 @@ export default function ScanView() {
     setProcessing(true)
     setOcrError('')
 
+    const compressed = await compressImage(file)
     const formData = new FormData()
-    formData.append('image', file)
+    formData.append('image', compressed, 'plate.jpg')
 
     const xhr = new XMLHttpRequest()
     xhr.open('POST', '/api/vehicle/scan')

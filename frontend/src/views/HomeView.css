@@ -102,6 +102,24 @@
   flex: none;
 }
 
+.card-disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.card-badge {
+  flex: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #5a6272;
+  border: 1px solid #2a2f45;
+  border-radius: 6px;
+  padding: 3px 7px;
+}
+
 .footer {
   margin-top: 20px;
   text-align: center;

@@ -47,7 +47,7 @@ export default function HomeView() {
           </svg>
         </button>
 
-        <button className="card card-dark" onClick={() => navigate('/search')}>
+        <button className="card card-dark card-disabled" disabled>
           <div className="card-icon card-icon-dark">
             <svg width="26" height="22" viewBox="0 0 26 22" fill="none" stroke="#db3b2e" strokeWidth="2.2" strokeLinecap="round">
               <path d="M2 4h22"/>
@@ -57,11 +57,9 @@ export default function HomeView() {
           </div>
           <div className="card-text">
             <div className="card-title">Recherche par modèle</div>
-            <div className="card-sub card-sub-dark">Marque · Gamme · Modèle</div>
+            <div className="card-sub card-sub-dark">Bientôt disponible</div>
           </div>
-          <svg className="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3e4455" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 6l6 6-6 6"/>
-          </svg>
+          <span className="card-badge">SOON</span>
         </button>
       </div>
 

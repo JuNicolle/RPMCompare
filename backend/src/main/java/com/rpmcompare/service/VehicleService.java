@@ -52,7 +52,10 @@ public class VehicleService {
     }
 
     public Vehicle getByPlate(String plate) {
-        PlateLookup lookup = plateLookupRepository.findByPlateIgnoreCase(plate)
+        String normalized = plate.toUpperCase().replaceAll("[\\s\\-]", "");
+        PlateLookup lookup = plateLookupRepository.findAll().stream()
+                .filter(p -> p.getPlate().toUpperCase().replaceAll("[\\s\\-]", "").equals(normalized))
+                .findFirst()
                 .orElseThrow(() -> new VehicleNotFoundException("Plaque inconnue : " + plate));
         return toDto(lookup.getModel(), lookup.getPlate());
     }

@@ -9,67 +9,6 @@
   overflow: hidden;
 }
 
-.status-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 24px 6px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  font-weight: 600;
-  color: #f2f3f5;
-  flex: none;
-  z-index: 10;
-}
-
-.notch {
-  position: absolute;
-  left: 50%;
-  top: 12px;
-  transform: translateX(-50%);
-  width: 96px;
-  height: 26px;
-  background: #000;
-  border-radius: 14px;
-  z-index: 20;
-}
-
-.status-icons {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.battery {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-}
-
-.battery-body {
-  width: 24px;
-  height: 11px;
-  border: 1.5px solid #f2f3f5;
-  border-radius: 3px;
-  padding: 1.5px;
-}
-
-.battery-fill {
-  height: 100%;
-  width: 78%;
-  background: #f2f3f5;
-  border-radius: 1px;
-}
-
-.battery-tip {
-  width: 2px;
-  height: 5px;
-  background: #f2f3f5;
-  border-radius: 0 1px 1px 0;
-  opacity: .6;
-  margin-left: -1px;
-}
 
 .screen-area {
   flex: 1;
