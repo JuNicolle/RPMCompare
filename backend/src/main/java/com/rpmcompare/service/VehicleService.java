@@ -9,6 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
+import com.rpmcompare.model.dto.ApiPlaqueResponse;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,16 +26,27 @@ public class VehicleService {
     private final PlateLookupRepository plateLookupRepository;
 
     public VehicleService(PlateRecognizerService plateRecognizerService,
-                          BrandRepository brandRepository,
-                          VehicleRangeRepository rangeRepository,
-                          VehicleModelRepository modelRepository,
-                          PlateLookupRepository plateLookupRepository) {
+            BrandRepository brandRepository,
+            VehicleRangeRepository rangeRepository,
+            VehicleModelRepository modelRepository,
+            PlateLookupRepository plateLookupRepository) {
         this.plateRecognizerService = plateRecognizerService;
         this.brandRepository = brandRepository;
         this.rangeRepository = rangeRepository;
         this.modelRepository = modelRepository;
         this.plateLookupRepository = plateLookupRepository;
     }
+
+    // --- Configuration de l'API externe ---
+    @Value("${api.plaque.base-url:https://api.apiplaqueimmatriculation.com}")
+    private String apiBaseUrl;
+
+    @Value("${api.plaque.token:TokenDemo2026B}")
+    private String apiToken;
+
+    // Cache mémoire pour accélérer les recherches répétées sur une même plaque
+    private final Map<String, Vehicle> apiCache = new ConcurrentHashMap<>();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public List<String> getBrands() {
         return brandRepository.findAll().stream()
@@ -53,11 +69,66 @@ public class VehicleService {
 
     public Vehicle getByPlate(String plate) {
         String normalized = plate.toUpperCase().replaceAll("[\\s\\-]", "");
+
+        // 1. Vérification dans le cache local (réponse instantanée si la plaque a déjà été trouvée via l'API)
+        if (apiCache.containsKey(normalized)) {
+            return apiCache.get(normalized);
+        }
+
+        // 2. Appel à l'API externe
+        try {
+            String url = apiBaseUrl + "/plaque?immatriculation=" + plate + "&token=" + apiToken + "&pays=FR";
+            // L'API nécessite une méthode POST
+            ApiPlaqueResponse response = restTemplate.postForObject(url, null, ApiPlaqueResponse.class);
+            if (response != null && response.getCode_erreur() == 200 && response.getData() != null) {
+                Vehicle v = mapApiDataToVehicle(response.getData());
+                apiCache.put(normalized, v); // Ajout au cache UNIQUEMENT après un succès API
+                return v;
+            }
+        } catch (Exception e) {
+            // En cas d'erreur (injoignable, hors forfait), on laisse silencieusement couler
+            // pour déclencher le fallback
+            System.err.println("Erreur API Plaque : " + e.getMessage());
+        }
+
+        // 3. Fallback sur la base de données locale si l'API a échoué
         PlateLookup lookup = plateLookupRepository.findAll().stream()
                 .filter(p -> p.getPlate().toUpperCase().replaceAll("[\\s\\-]", "").equals(normalized))
                 .findFirst()
                 .orElseThrow(() -> new VehicleNotFoundException("Plaque inconnue : " + plate));
+        
         return toDto(lookup.getModel(), lookup.getPlate());
+    }
+
+    private Vehicle mapApiDataToVehicle(com.rpmcompare.model.dto.ApiPlaqueData data) {
+        String brand = data.getMarque() != null ? data.getMarque() : "N/A";
+        String model = data.getModele() != null ? data.getModele() : "N/A";
+        String version = data.getVersion() != null ? data.getVersion() : model;
+        String name = brand + " " + version;
+
+        String powerStr = data.getPuisFiscReelCH() != null ? data.getPuisFiscReelCH().replaceAll("[^0-9]", "") : "0";
+        int power = powerStr.isEmpty() ? 0 : Integer.parseInt(powerStr);
+
+        String weightStr = data.getPoids() != null ? data.getPoids() : "N/A";
+        String displacementStr = data.getCcm() != null ? data.getCcm() : "N/A";
+
+        return new Vehicle(
+                brand,
+                version,
+                name,
+                data.getDebutModele() != null ? data.getDebutModele() : "N/A",
+                data.getTypeMoteur() != null ? data.getTypeMoteur() : "N/A",
+                data.getCodeMoteur() != null ? data.getCodeMoteur() : "N/A",
+                displacementStr,
+                data.getEnergieNGC() != null ? data.getEnergieNGC() : "N/A",
+                data.getBoiteVitesse() != null ? data.getBoiteVitesse() : "N/A",
+                data.getTypeTransmission() != null ? data.getTypeTransmission() : "N/A",
+                power,
+                0, // torque Nm (N/A non possible car type int)
+                weightStr,
+                "N/A", // accel
+                "N/A", // vmax
+                data.getImmat() != null ? data.getImmat() : "N/A");
     }
 
     public Vehicle getByModel(String brandName, String rangeName, String modelName) {
@@ -80,7 +151,8 @@ public class VehicleService {
 
     private Vehicle toDto(VehicleModel m, String plate) {
         VehicleSpecs s = m.getSpecs();
-        if (s == null) throw new VehicleNotFoundException("Specs manquantes pour ce modèle");
+        if (s == null)
+            throw new VehicleNotFoundException("Specs manquantes pour ce modèle");
         return new Vehicle(
                 m.getRange().getBrand().getName(),
                 m.getName(),
@@ -97,12 +169,12 @@ public class VehicleService {
                 frNum(s.getWeightKg()) + " kg",
                 frAccel(s.getAccel0100()) + " s",
                 s.getVmaxKph() + " km/h",
-                plate != null ? plate : ""
-        );
+                plate != null ? plate : "");
     }
 
     private String frNum(int n) {
-        if (n >= 1000) return (n / 1000) + " " + String.format("%03d", n % 1000);
+        if (n >= 1000)
+            return (n / 1000) + " " + String.format("%03d", n % 1000);
         return String.valueOf(n);
     }
 

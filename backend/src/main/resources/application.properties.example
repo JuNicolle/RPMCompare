@@ -19,3 +19,7 @@ spring.servlet.multipart.max-request-size=10MB
 # Plate Recognizer — https://app.platerecognizer.com/accounts/profile/
 # Laisser vide pour utiliser le mock en dev
 platerecognizer.api-key=
+
+# API Plaque Immatriculation
+api.plaque.base-url=https://api.apiplaqueimmatriculation.com
+api.plaque.token=TokenDemo2026B
