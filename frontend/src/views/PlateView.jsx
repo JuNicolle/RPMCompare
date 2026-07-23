@@ -5,7 +5,7 @@ import './PlateView.css'
 
 export default function PlateView() {
   const navigate = useNavigate()
-  const { setPlate } = useStore()
+  const { setPlate, duelMode } = useStore()
   const [plate, setLocalPlate] = useState('')
 
   function onInput(e) {
@@ -16,7 +16,7 @@ export default function PlateView() {
     const clean = plate.replace(/[\s-]/g, '')
     if (clean.length >= 4) {
       setPlate(plate)
-      navigate('/fiche')
+      navigate(duelMode ? '/duel' : '/fiche')
     }
   }
 

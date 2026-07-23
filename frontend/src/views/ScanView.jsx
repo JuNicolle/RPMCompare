@@ -5,7 +5,8 @@ import './ScanView.css'
 
 export default function ScanView() {
   const navigate = useNavigate()
-  const { setPlate } = useStore()
+  const { setPlate, duelMode } = useStore()
+  const [stream, setStream] = useState(null)
   const videoRef = useRef(null)
   const fileInputRef = useRef(null)
   const streamRef = useRef(null)
@@ -109,7 +110,7 @@ export default function ScanView() {
           setDisplayPlate(data.plate)
           setPlate(data.plate)
           setDetected(true)
-          setTimeout(() => navigate('/fiche'), 950)
+          setTimeout(() => navigate(duelMode ? '/duel' : '/fiche'), 950)
         } else {
           setOcrError(`[${xhr.status}] ${data.error || 'Plaque non reconnue'}`)
           setProcessing(false)

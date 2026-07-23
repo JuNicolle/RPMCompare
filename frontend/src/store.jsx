@@ -8,12 +8,18 @@ export function StoreProvider({ children }) {
   const [searchRange, setSearchRange] = useState('')
   const [searchModel, setSearchModel] = useState('')
 
+  // Duel Mode state
+  const [duelMode, setDuelMode] = useState(false)
+  const [primaryCar, setPrimaryCar] = useState(null)
+
   return (
     <StoreContext.Provider value={{
       plate, setPlate,
       searchBrand, setSearchBrand,
       searchRange, setSearchRange,
-      searchModel, setSearchModel
+      searchModel, setSearchModel,
+      duelMode, setDuelMode,
+      primaryCar, setPrimaryCar
     }}>
       {children}
     </StoreContext.Provider>
