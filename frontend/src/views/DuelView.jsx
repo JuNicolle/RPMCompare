@@ -5,8 +5,15 @@ import './DuelView.css'
 
 export default function DuelView() {
   const navigate = useNavigate()
-  const { primaryCar, plate, searchBrand, searchRange, searchModel, setPlate } = useStore()
-
+  const { 
+    primaryCar, setPrimaryCar, 
+    plate, setPlate, 
+    searchBrand, setSearchBrand, 
+    searchRange, setSearchRange, 
+    searchModel, setSearchModel, 
+    setDuelMode 
+  } = useStore()
+  
   const [competitorCar, setCompetitorCar] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -134,7 +141,12 @@ export default function DuelView() {
   }
 
   const goRescan = () => {
-    setPlate('') // clear competitor plate
+    setPlate('')
+    setSearchBrand('')
+    setSearchRange('')
+    setSearchModel('')
+    setPrimaryCar(null)
+    setDuelMode(false)
     navigate('/')
   }
 

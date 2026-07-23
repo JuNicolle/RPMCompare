@@ -9,7 +9,16 @@ export default function PlateView() {
   const [plate, setLocalPlate] = useState('')
 
   function onInput(e) {
-    setLocalPlate(e.target.value.toUpperCase().slice(0, 9))
+    // Ne garder que les lettres et chiffres
+    let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    
+    // Formater en AA-123-CD
+    let formatted = ''
+    if (val.length > 0) formatted += val.substring(0, 2)
+    if (val.length > 2) formatted += '-' + val.substring(2, 5)
+    if (val.length > 5) formatted += '-' + val.substring(5, 7)
+
+    setLocalPlate(formatted)
   }
 
   function submit() {
