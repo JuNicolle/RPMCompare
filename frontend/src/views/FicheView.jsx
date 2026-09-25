@@ -5,7 +5,7 @@ import './FicheView.css'
 
 export default function FicheView() {
   const navigate = useNavigate()
-  const { plate, searchBrand, searchRange, searchModel } = useStore()
+  const { plate, setPlate, searchBrand, searchRange, searchModel, setSearchBrand, setSearchRange, setSearchModel, setDuelMode, setPrimaryCar } = useStore()
   const [car, setCar] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -157,7 +157,17 @@ export default function FicheView() {
       </div>
 
       <div className="comparateur-wrap">
-        <button className="comparateur-btn">+ COMPARATEUR · BIENTÔT</button>
+        <button className="comparateur-btn" onClick={() => {
+          setPrimaryCar(car)
+          setDuelMode(true)
+          setPlate('')
+          setSearchBrand('')
+          setSearchRange('')
+          setSearchModel('')
+          navigate('/')
+        }}>
+          LANCER UN DUEL
+        </button>
       </div>
     </div>
   )

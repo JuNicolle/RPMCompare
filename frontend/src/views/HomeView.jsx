@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom'
+import { useStore } from '../store'
 import './HomeView.css'
 
 export default function HomeView() {
   const navigate = useNavigate()
+  const { duelMode, primaryCar } = useStore()
   return (
     <div className="home">
       <div className="header">
         <div className="wordmark">RPM<span className="accent">COMPARE</span></div>
-        <div className="tagline">IDENTIFIEZ INSTANTANÉMENT</div>
+        <div className="tagline">{duelMode ? `SÉLECTION DU CONCURRENT POUR ${primaryCar?.plate}` : 'IDENTIFIEZ INSTANTANÉMENT'}</div>
       </div>
 
       <div className="cards">

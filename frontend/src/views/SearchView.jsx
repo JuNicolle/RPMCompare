@@ -7,7 +7,12 @@ const TITLES = ['Choisir une marque', 'Choisir une gamme', 'Choisir un modèle']
 
 export default function SearchView() {
   const navigate = useNavigate()
-  const { setPlate, setSearchBrand, setSearchRange, setSearchModel } = useStore()
+  const { 
+    searchBrand, setSearchBrand, 
+    searchRange, setSearchRange, 
+    searchModel, setSearchModel,
+    duelMode, setPlate 
+  } = useStore()
   const [step, setStep] = useState(0)
   const [brand, setBrand] = useState('')
   const [range, setRange] = useState('')
@@ -41,6 +46,14 @@ export default function SearchView() {
     if (step === 2) fetchList(`/api/brands/${encodeURIComponent(brand)}/ranges/${encodeURIComponent(range)}/models`)
   }, [step])
 
+  function goFiche(modelName) {
+    setPlate('')
+    setSearchBrand(brand)
+    setSearchRange(range)
+    setSearchModel(modelName)
+    navigate(duelMode ? '/duel' : '/fiche')
+  }
+
   function pick(item) {
     if (step === 0) {
       setBrand(item)
@@ -49,11 +62,7 @@ export default function SearchView() {
       setRange(item)
       setStep(2)
     } else {
-      setPlate('')
-      setSearchBrand(brand)
-      setSearchRange(range)
-      setSearchModel(item)
-      navigate('/fiche')
+      goFiche(item)
     }
   }
 

@@ -1,0 +1,271 @@
+.duel-screen {
+  background: radial-gradient(circle at top, #1c2331 0%, #0d111a 100%);
+  min-height: 100%;
+  width: 100%;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding-bottom: 30px;
+}
+
+.duel-centered {
+  justify-content: center;
+  align-items: center;
+}
+
+.duel-header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+}
+
+.duel-header .back-btn {
+  background: none;
+  border: none;
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.duel-header .header-title {
+  flex: 1;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.1em;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+.duel-header .share-btn {
+  background: none;
+  border: none;
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* VS Photos Section */
+.duel-photos {
+  position: relative;
+  height: 220px;
+  margin: 0 15px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+}
+
+.photo-left, .photo-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.photo-left {
+  left: 0;
+  width: 60%;
+  background: linear-gradient(135deg, #2a2d3e, #1a1c29);
+  clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+  z-index: 1;
+}
+
+.photo-right {
+  right: 0;
+  width: 60%;
+  background: linear-gradient(135deg, #1c292f, #142026);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%);
+  z-index: 0;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.photo-plate {
+  background: #f0f0f0;
+  color: #000;
+  font-family: monospace;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-bottom: auto;
+  align-self: flex-start;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.photo-right .photo-plate {
+  align-self: flex-end;
+}
+
+.photo-name {
+  font-weight: 700;
+  font-size: 0.85em;
+  text-transform: uppercase;
+}
+
+.photo-sub {
+  font-size: 0.65em;
+  color: rgba(255,255,255,0.6);
+}
+
+.vs-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  font-weight: 900;
+  font-size: 2em;
+  font-style: italic;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+}
+.vs-v { color: #db3b2e; }
+.vs-s { color: #00c3ff; }
+
+/* Stats List */
+.duel-stats {
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.stat-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7em;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.stat-header .brand {
+  flex: 1;
+}
+.stat-header .brand.right {
+  text-align: right;
+}
+.stat-header .stat-title {
+  flex: 2;
+  text-align: center;
+}
+
+.stat-bars {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.stat-bar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 15px;
+  font-weight: 800;
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: all 0.5s ease;
+}
+
+.stat-bar.left {
+  clip-path: polygon(0 0, 95% 0, 85% 100%, 0 100%);
+  justify-content: flex-start;
+}
+
+.stat-bar.right {
+  clip-path: polygon(15% 0, 100% 0, 100% 100%, 5% 100%);
+  justify-content: flex-end;
+}
+
+/* Winner styling */
+.stat-bar.left.winner {
+  background: linear-gradient(90deg, rgba(219,59,46,0.3), rgba(219,59,46,0.8));
+  border: 1px solid #db3b2e;
+  box-shadow: 0 0 10px rgba(219,59,46,0.5);
+}
+
+.stat-bar.right.winner {
+  background: linear-gradient(90deg, rgba(0,195,255,0.8), rgba(0,195,255,0.3));
+  border: 1px solid #00c3ff;
+  box-shadow: 0 0 10px rgba(0,195,255,0.5);
+}
+
+.stat-header .brand.left.winner { color: #db3b2e; }
+.stat-header .brand.right.winner { color: #00c3ff; }
+
+/* Winner Summary */
+.duel-summary {
+  text-align: center;
+  margin-top: 10px;
+  padding: 0 20px;
+}
+
+.summary-title {
+  font-size: 0.9em;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.summary-winner {
+  font-size: 1.5em;
+  font-weight: 900;
+  font-style: italic;
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.summary-winner.left { color: #db3b2e; }
+.summary-winner.right { color: #00c3ff; }
+.summary-winner.tie { color: #fff; }
+
+.summary-desc {
+  font-size: 0.75em;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.4;
+  margin-bottom: 25px;
+}
+
+/* Rescan button */
+.rescan-btn {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 30px;
+  padding: 15px 30px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto;
+  cursor: pointer;
+  box-shadow: inset 0 0 20px rgba(0,195,255,0.2), 0 0 15px rgba(0,0,0,0.5);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.stat-bar.winner {
+  animation: pulse 1s ease-out;
+}

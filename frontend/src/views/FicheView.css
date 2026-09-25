@@ -257,13 +257,21 @@
 
 .comparateur-btn {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
-  background: transparent;
-  border: 1px dashed #222630;
-  color: #363d4a;
-  font-size: 12px;
+  background: linear-gradient(135deg, rgba(219,59,46,0.15), rgba(219,59,46,0.02));
+  border: 1px solid rgba(219,59,46,0.5);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 2px;
-  cursor: default;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(219,59,46,0.1);
+  transition: all 0.2s ease;
+}
+
+.comparateur-btn:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(219,59,46,0.25), rgba(219,59,46,0.05));
 }
