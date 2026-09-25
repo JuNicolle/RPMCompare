@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
+import { DUEL_STATS } from '../constants'
+import { BackIcon, ShareIcon, TrophyIcon, CameraIcon } from '../components/Icons'
 import './DuelView.css'
 
 export default function DuelView() {
@@ -73,18 +75,10 @@ export default function DuelView() {
     return isNaN(num) ? 0 : num
   }
 
-  const stats = [
-    { label: 'PUISSANCE (ch)', unit: 'ch', key: 'power', higherIsBetter: true },
-    { label: 'ACCÉLÉRATION (0-100)', unit: 's', key: 'accel', higherIsBetter: false },
-    { label: 'COUPLE (Nm)', unit: 'Nm', key: 'torque', higherIsBetter: true },
-    { label: 'VITESSE MAX (km/h)', unit: 'km/h', key: 'vmax', higherIsBetter: true },
-    { label: 'POIDS (kg)', unit: 'kg', key: 'weight', higherIsBetter: false },
-  ]
-
   let primaryWins = 0
   let competitorWins = 0
 
-  const statRows = stats.map(stat => {
+  const statRows = DUEL_STATS.map(stat => {
     const val1 = parseStat(primaryCar[stat.key])
     const val2 = parseStat(competitorCar[stat.key])
 
@@ -154,17 +148,11 @@ export default function DuelView() {
     <div className="duel-screen">
       <div className="duel-header">
         <button className="back-btn" onClick={() => navigate('/fiche')}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <BackIcon />
         </button>
         <div className="header-title">RÉSULTAT DU DUEL</div>
         <button className="share-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-            <polyline points="16 6 12 2 8 6" />
-            <line x1="12" y1="2" x2="12" y2="15" />
-          </svg>
+          <ShareIcon />
         </button>
       </div>
 
@@ -191,20 +179,13 @@ export default function DuelView() {
       <div className="duel-summary">
         <div className="summary-title">VAINQUEUR</div>
         <div className={`summary-winner ${winnerClass}`}>
-          {winnerClass !== 'tie' && (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21 4h-3V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v1H3a1 1 0 0 0-1 1v3c0 2.21 1.79 4 4 4h1.03A5.002 5.002 0 0 0 11 15.93V19H7a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-4v-3.07A5.002 5.002 0 0 0 16.97 12H18c2.21 0 4-1.79 4-4V5a1 1 0 0 0-1-1zM6 10c-1.1 0-2-.9-2-2V6h2v4zm14-2c0 1.1-.9 2-2 2h-2V6h2v2z" />
-            </svg>
-          )}
+          {winnerClass !== 'tie' && <TrophyIcon />}
           {winnerText}
         </div>
         <div className="summary-desc">{winnerDesc}</div>
 
         <button className="rescan-btn" onClick={goRescan}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" />
-          </svg>
+          <CameraIcon />
           RESCANNER UNE PLAQUE
         </button>
       </div>
